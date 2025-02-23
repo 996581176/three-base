@@ -92,7 +92,6 @@ function onPointerMove(event: PointerEvent) {
   raycaster.setFromCamera(pointPos, camera);
   const intersects = raycaster.intersectObjects(scene.children);
   if (intersects.length > 0 && intersects[0].object instanceof THREE.Line) {
-    console.log("🚀 ~ onPointerMove ~ intersects[0]:", intersects[0]);
     (intersects[0].object.material as THREE.LineBasicMaterial).color.set(
       0xffffff
     );
@@ -143,7 +142,6 @@ function createOutline(geometry: THREE.BufferGeometry) {
 }
 
 function setView(object: THREE.Object3D) {
-  controller.noRotate = true;
   const rect = new THREE.Vector2();
   renderer.getSize(rect);
   const box = new THREE.Box3().setFromObject(object);
@@ -170,7 +168,6 @@ function setView(object: THREE.Object3D) {
   controller.target = v3;
   controller.update();
   camera.updateProjectionMatrix();
-  console.log(camera, "🚀*****************");
 }
 </script>
 
