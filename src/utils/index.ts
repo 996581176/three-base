@@ -1,9 +1,5 @@
 import * as THREE from "three";
-import {
-  computeBoundsTree,
-  disposeBoundsTree,
-  acceleratedRaycast,
-} from "three-mesh-bvh";
+import { computeBoundsTree, disposeBoundsTree, acceleratedRaycast } from "three-mesh-bvh";
 import { TrackballControls } from "three/examples/jsm/controls/TrackballControls";
 import { CSS2DRenderer } from "three/examples/jsm/renderers/CSS2DRenderer";
 import { Ref } from "vue";
@@ -20,11 +16,7 @@ export function addBVHExtension() {
  * @param width canvas宽度
  * @param height canvas高度
  */
-export function getPointNDCPosition(
-  mouseEvent: PointerEvent,
-  width: number,
-  height: number
-) {
+export function getPointNDCPosition(mouseEvent: PointerEvent, width: number, height: number) {
   return new THREE.Vector2(
     (mouseEvent.clientX / width) * 2 - 1,
     -(mouseEvent.clientY / height) * 2 + 1
@@ -93,10 +85,7 @@ export function initThree({
     const ambient = new THREE.AmbientLight(0xffffff);
     scene.add(ambient);
 
-    const directLight = new THREE.DirectionalLight(
-      new THREE.Color(0xf4f4f4),
-      2
-    );
+    const directLight = new THREE.DirectionalLight(new THREE.Color(0xf4f4f4), 2);
     directLight.position.set(0.5, 0, 0.866); // ~60º
     scene.add(directLight);
   }
@@ -131,56 +120,49 @@ export function animate({
   renderer.setAnimationLoop(tick);
 }
 
-/**相机自适应 */
-export function updateCamera({
-  width,
-  height,
-  camera,
-  controls,
-  objectArr,
-}: {
-  width: number;
-  height: number;
-  camera: THREE.OrthographicCamera;
-  controls: TrackballControls;
-  objectArr: THREE.Object3D[];
-}) {
+/**相机自适应
+ * @param camera 相机
+ * @param controls 轨迹球
+ * @param objects 模型对象列表
+ * @param width 画布宽度
+ * @param height 画布高度
+ */
+export function updateCamera(
+  camera: THREE.OrthographicCamera,
+  controls: TrackballControls,
+  objects: THREE.Object3D[],
+  width: number,
+  height: number
+) {
   const lockViewMeshBox = new THREE.Box3();
-  for (const object of objectArr) {
+  objects.forEach((object) => {
     object.updateMatrixWorld();
     const meshBox = new THREE.Box3().setFromObject(object);
     lockViewMeshBox.union(meshBox);
-  }
+  });
   const lockViewMeshCenter = lockViewMeshBox.getCenter(new THREE.Vector3());
   const size = new THREE.Vector3();
   lockViewMeshBox.getSize(size);
-  const meshFrustumSize = Math.max(size.x, size.y, size.z);
+  const sizeLength = size.length();
+  const boxMax = Math.max(size.x, size.y, size.z);
 
-  const widthZoom = width / meshFrustumSize;
-  // 画布高度是 包围球直径的 heightZoom倍。即包围球缩放heightZoom倍，高度正好填满画布。
-  const heightZoom = height / meshFrustumSize;
-  // 取两者缩放比例较小者，设置为正交相机的缩放倍数。
+  const widthZoom = width / boxMax;
+  const heightZoom = height / boxMax;
+  // 选择较小的缩放比例确保整个包围盒都能完整地显示在画布内
   if (widthZoom >= heightZoom) {
     camera.zoom = heightZoom;
   } else {
     camera.zoom = widthZoom;
   }
-  const right = lockViewMeshCenter
-    .clone()
-    .cross(new THREE.Vector3(0, 0, 1))
-    .normalize();
-  const front = right.clone().cross(new THREE.Vector3(0, 0, 1)).normalize();
-  const up = right.clone().cross(front.clone()).normalize();
-  const pos = lockViewMeshCenter.clone().addScaledVector(up, meshFrustumSize);
-
-  if (pos.equals(lockViewMeshCenter)) {
-    pos.z += 30;
-  }
-
-  camera.position.set(pos.x, pos.y, pos.z);
-  camera.lookAt(lockViewMeshCenter);
-  controls.target = lockViewMeshCenter;
-  controls.update();
+  camera.near = sizeLength / 100;
+  camera.far = sizeLength * 100;
   camera.updateProjectionMatrix();
-  return camera.zoom;
+  camera.position.copy(lockViewMeshCenter);
+  camera.position.x += sizeLength / 2.0;
+  camera.position.y += sizeLength / 5.0;
+  camera.position.z += sizeLength / 2.0;
+  camera.lookAt(lockViewMeshCenter);
+
+  // 设置控制器的焦点, 控制器的轨道围绕它运行
+  controls.target = lockViewMeshCenter;
 }
