@@ -1,8 +1,7 @@
 import * as THREE from "three";
 import { computeBoundsTree, disposeBoundsTree, acceleratedRaycast } from "three-mesh-bvh";
-import { TrackballControls } from "three/examples/jsm/controls/TrackballControls";
+import { OrbitControls } from "three/examples/jsm/Addons";
 import { CSS2DRenderer } from "three/examples/jsm/renderers/CSS2DRenderer";
-import { Ref } from "vue";
 
 /** 添加bvh */
 export function addBVHExtension() {
@@ -72,11 +71,11 @@ export function initThree({
   labelRenderer.domElement.style.top = "0px";
   document.getElementById("main")?.appendChild(labelRenderer.domElement);
 
-  const controller = new TrackballControls(camera, labelRenderer.domElement);
+  const controller = new OrbitControls(camera, labelRenderer.domElement);
   controller.rotateSpeed = 15;
   controller.zoomSpeed = 2;
   controller.panSpeed = 2.4;
-  controller.staticMoving = true;
+  // controller.staticMoving = true;
 
   if (addLight) {
     const hemiLight = new THREE.HemisphereLight(0xffffff, 0x8d8d8d, 3);
@@ -110,7 +109,7 @@ export function animate({
   camera: THREE.Camera;
   renderer: THREE.WebGLRenderer;
   labelRenderer: CSS2DRenderer;
-  controller: TrackballControls;
+  controller: OrbitControls;
 }) {
   const tick = () => {
     renderer.render(scene, camera);
@@ -129,10 +128,9 @@ export function animate({
  */
 export function updateCamera(
   camera: THREE.OrthographicCamera,
-  controls: TrackballControls,
+  controls: OrbitControls,
   objects: THREE.Object3D[],
-  width: number,
-  height: number
+  renderer: THREE.WebGLRenderer
 ) {
   const lockViewMeshBox = new THREE.Box3();
   objects.forEach((object) => {
@@ -146,8 +144,9 @@ export function updateCamera(
   const sizeLength = size.length();
   const boxMax = Math.max(size.x, size.y, size.z);
 
-  const widthZoom = width / boxMax;
-  const heightZoom = height / boxMax;
+  const canvasSize = renderer.getSize(new THREE.Vector2());
+  const widthZoom = canvasSize.x / boxMax;
+  const heightZoom = canvasSize.y / boxMax;
   // 选择较小的缩放比例确保整个包围盒都能完整地显示在画布内
   if (widthZoom >= heightZoom) {
     camera.zoom = heightZoom;

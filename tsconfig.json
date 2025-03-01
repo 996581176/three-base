@@ -1,7 +1,7 @@
 // tsconfig.json
 {
   "compilerOptions": {
-    "types": ["vite/client", "vite-plugin-glsl/ext"],
+    "types": ["vite/client", "vite-plugin-glsl/ext", "@types/three/examples/jsm/Addons.d.ts"],
     "paths": {
       "@/*": ["./src/*"]
     },
@@ -44,8 +44,8 @@
     "noUnusedLocals": false
     // 设置类型文件所在目录
     // "typeRoots": ["./my-types"]
-  }
+  },
   // 入口文件，在指定目录时，只有指定目录下的文件才会被ts扫描，此时在指定目录外的类型文件会不起作用，将.d.ts文件放入这里面即可
-  // "include": ["src/*"]
+  // "include": ["src/**/*"]
   // "exclude": ["node_modules"]
 }
