@@ -1,7 +1,12 @@
 // tsconfig.json
 {
   "compilerOptions": {
-    "types": ["vite/client"],
+    "types": ["vite/client", "vite-plugin-glsl/ext"],
+    "paths": {
+      "@/*": ["./src/*"]
+    },
+    "noEmit": true,
+    "allowImportingTsExtensions": true,
     // 不报告执行不到的代码错误。
     "allowUnreachableCode": true,
     // 必须标注为null类型,才可以赋值为null

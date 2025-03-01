@@ -9,7 +9,7 @@ import { ref, onMounted } from "vue";
 import * as THREE from "three";
 import { TrackballControls } from "three/examples/jsm/controls/TrackballControls";
 import { CSS2DRenderer } from "three/examples/jsm/renderers/CSS2DRenderer";
-import { addBVHExtension, initThree, animate, getPointNDCPosition } from "../utils";
+import { addBVHExtension, initThree, animate } from "@/utils/index.ts";
 
 const domRef = ref<HTMLCanvasElement>();
 let scene: THREE.Scene;
